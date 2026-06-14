@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kadam Memories</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --kadam-yellow: #E8B923;
+      --kadam-gold: #f5cc4a;
+      --deep-green: #1B4332;
+      --night-black: #081018;
+      --text-white: #F8F9FA;
+      --glass-bg: rgba(255,255,255,0.05);
+      --glass-border: rgba(232,185,35,0.2);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--night-black);
+      color: var(--text-white);
+      font-family: 'Hind Siliguri', sans-serif;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* ── CANVAS RAIN ── */
+    #rain-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.35;
+    }
+
+    /* ── PETALS ── */
+    .petal-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .petal {
+      position: absolute;
+      top: -60px;
+      opacity: 0;
+      animation: petalFall linear infinite;
+    }
+
+    .petal svg { display: block; }
+
+    @keyframes petalFall {
+      0%   { transform: translateY(0) rotate(0deg) translateX(0); opacity: 0; }
+      5%   { opacity: 0.85; }
+      90%  { opacity: 0.6; }
+      100% { transform: translateY(110vh) rotate(720deg) translateX(80px); opacity: 0; }
+    }
+
+    /* ── MUSIC TOGGLE ── */
+    #music-btn {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 999;
+      background: var(--glass-bg);
+      border: 1.5px solid var(--glass-border);
+      backdrop-filter: blur(12px);
+      color: var(--kadam-yellow);
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 0 20px rgba(232,185,35,0.2);
+    }
+    #music-btn:hover {
+      background: rgba(232,185,35,0.15);
+      box-shadow: 0 0 30px rgba(232,185,35,0.4);
+      transform: scale(1.1);
+    }
+    #music-btn svg { width: 22px; height: 22px; }
+
+    /* ── SCROLL PROGRESS ── */
+    #progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--kadam-yellow), var(--deep-green));
+      z-index: 9999;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+
+    /* ── HERO ── */
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .hero-bg-glow {
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(27,67,50,0.5) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    /* ── KADAM SVG FLOWER ── */
+    .kadam-hero {
+      position: relative;
+      width: 200px; height: 200px;
+      margin-bottom: 36px;
+      animation: floatBob 4s ease-in-out infinite;
+      filter: drop-shadow(0 0 30px rgba(232,185,35,0.6));
+    }
+
+    @keyframes floatBob {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      25%       { transform: translateY(-12px) rotate(2deg); }
+      75%       { transform: translateY(-6px) rotate(-2deg); }
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 700;
+      color: var(--kadam-yellow);
+      letter-spacing: 3px;
+      text-shadow: 0 0 40px rgba(232,185,35,0.5), 0 2px 20px rgba(0,0,0,0.8);
+      margin-bottom: 20px;
+      animation: fadeSlideDown 1.2s ease forwards;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      color: rgba(248,249,250,0.8);
+      font-style: italic;
+      max-width: 560px;
+      line-height: 1.8;
+      margin-bottom: 44px;
+      animation: fadeSlideDown 1.4s ease forwards;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+    }
+
+    .hero-btn {
+      display: inline-block;
+      padding: 15px 44px;
+      background: linear-gradient(135deg, var(--kadam-yellow), #b8901a);
+      color: var(--night-black);
+      font-family: 'Hind Siliguri', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      animation: fadeSlideDown 1.6s ease forwards;
+      box-shadow: 0 8px 32px rgba(232,185,35,0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .hero-btn:hover::before { left: 100%; }
+    .hero-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(232,185,35,0.6);
+    }
+
+    @keyframes fadeSlideDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── SCROLL INDICATOR ── */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      animation: bounce 2s infinite;
+    }
+
+    .scroll-indicator span {
+      display: block;
+      width: 2px; height: 30px;
+      background: linear-gradient(to bottom, transparent, var(--kadam-yellow));
+      border-radius: 2px;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.6; }
+      50%       { transform: translateX(-50%) translateY(8px); opacity: 1; }
+    }
+
+    /* ── SECTIONS COMMON ── */
+    .story-section {
+      position: relative;
+      z-index: 2;
+      padding: 90px 20px;
+    }
+
+    .section-inner {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    /* ── GLASS CARD ── */
+    .glass-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 50px 50px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(232,185,35,0.5), transparent);
+    }
+
+    .glass-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 24px 60px rgba(232,185,35,0.1);
+    }
+
+    .section-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 5rem;
+      color: rgba(232,185,35,0.08);
+      position: absolute;
+      top: 20px; right: 30px;
+      font-weight: 700;
+      user-select: none;
+      line-height: 1;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      color: var(--kadam-yellow);
+      margin-bottom: 28px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -8px; left: 0;
+      width: 50px; height: 2px;
+      background: linear-gradient(90deg, var(--kadam-yellow), transparent);
+      border-radius: 2px;
+    }
+
+    .section-text {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      line-height: 2.1;
+      color: rgba(248,249,250,0.85);
+      font-weight: 300;
+    }
+
+    .section-text p { margin-bottom: 14px; }
+    .section-text p:last-child { margin-bottom: 0; }
+
+    /* ── DIVIDER ── */
+    .kadam-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 20px 0;
+    }
+
+    .kadam-divider::before,
+    .kadam-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      max-width: 200px;
+      background: linear-gradient(90deg, transparent, rgba(232,185,35,0.3), transparent);
+    }
+
+    /* ── ALTERNATE SECTION BG ── */
+    .section-alt {
+      background: linear-gradient(180deg, transparent, rgba(27,67,50,0.08), transparent);
+    }
+
+    /* ── FINAL SECTION ── */
+    #final-section {
+      position: relative;
+      z-index: 2;
+      min-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .final-glow {
+      position: absolute;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(232,185,35,0.06) 0%, transparent 65%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    /* ── KADAM TREE ── */
+    .kadam-tree-wrap {
+      position: relative;
+      width: 280px; height: 280px;
+      margin: 0 auto 50px;
+      animation: treeSway 6s ease-in-out infinite;
+      filter: drop-shadow(0 0 40px rgba(232,185,35,0.4));
+    }
+
+    @keyframes treeSway {
+      0%, 100% { transform: rotate(0deg); }
+      25%       { transform: rotate(1.5deg); }
+      75%       { transform: rotate(-1.5deg); }
+    }
+
+    .final-quote {
+      max-width: 600px;
+      margin: 0 auto 60px;
+    }
+
+    .final-quote p {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      line-height: 2;
+      color: var(--text-white);
+      font-style: italic;
+    }
+
+    .final-quote p span {
+      color: var(--kadam-yellow);
+      font-weight: 700;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 1px solid rgba(232,185,35,0.1);
+      color: rgba(248,249,250,0.4);
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+    }
+
+    footer span { color: var(--kadam-yellow); }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-left {
+      opacity: 0;
+      transform: translateX(-50px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+
+    .reveal-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* ── AMBIENT GLOW ORBS ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.25;
+      animation: orbDrift 20s ease-in-out infinite alternate;
+    }
+
+    .orb-1 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(27,67,50,0.8), transparent);
+      top: -100px; left: -100px;
+    }
+
+    .orb-2 {
+      width: 350px; height: 350px;
+      background: radial-gradient(circle, rgba(232,185,35,0.3), transparent);
+      bottom: -80px; right: -80px;
+      animation-delay: -10s;
+    }
+
+    @keyframes orbDrift {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(40px, 40px); }
+    }
+
+    /* ── FLOATING MINI KADAM ── */
+    .float-kadam {
+      position: fixed;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0;
+      animation: floatUp linear infinite;
+    }
+
+    @keyframes floatUp {
+      0%   { transform: translateY(0) scale(0.8) rotate(0deg); opacity: 0; }
+      10%  { opacity: 0.5; }
+      90%  { opacity: 0.3; }
+      100% { transform: translateY(-100vh) scale(1.2) rotate(360deg); opacity: 0; }
+    }
+
+    /* ── QUOTE HIGHLIGHT ── */
+    .highlight {
+      color: var(--kadam-yellow);
+      font-weight: 500;
+    }
+
+    /* ── SECTION ICON ── */
+    .section-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px; height: 40px;
+      background: rgba(232,185,35,0.1);
+      border: 1px solid rgba(232,185,35,0.3);
+      border-radius: 50%;
+      margin-bottom: 20px;
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 640px) {
+      .glass-card { padding: 32px 24px; }
+      .kadam-hero { width: 150px; height: 150px; }
+      .kadam-tree-wrap { width: 200px; height: 200px; }
+      #music-btn { bottom: 20px; right: 20px; }
+    }
+
+    /* ── NOISE TEXTURE ── */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* pulse ring around hero flower */
+    .pulse-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 2px solid rgba(232,185,35,0.4);
+      animation: pulseRing 3s ease-out infinite;
+    }
+
+    @keyframes pulseRing {
+      0%   { width: 160px; height: 160px; opacity: 0.8; }
+      100% { width: 320px; height: 320px; opacity: 0; }
+    }
+
+    .pulse-ring-2 { animation-delay: 1s; }
+    .pulse-ring-3 { animation-delay: 2s; }
+
+    /* section separator line animation */
+    .sep-line {
+      width: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--kadam-yellow), rgba(232,185,35,0.1));
+      margin: 40px auto;
+      max-width: 200px;
+      transition: width 1.2s ease;
+    }
+
+    .sep-line.visible { width: 200px; }
+
+  </style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div id="progress-bar"></div>
+
+<!-- Ambient Orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- Rain Canvas -->
+<canvas id="rain-canvas"></canvas>
+
+<!-- Petals Container -->
+<div class="petal-container" id="petal-container"></div>
+
+<!-- Music Toggle -->
+<button id="music-btn" title="Toggle ambient music" aria-label="Toggle music">
+  <svg id="music-icon-on" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+  </svg>
+  <svg id="music-icon-off" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" style="display:none">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" clip-rule="evenodd"/>
+    <path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+  </svg>
+</button>
+
+<!-- ═══════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-bg-glow"></div>
+
+  <!-- Pulse rings -->
+  <div style="position:relative; display:flex; align-items:center; justify-content:center; margin-bottom:36px;">
+    <div class="pulse-ring"></div>
+    <div class="pulse-ring pulse-ring-2"></div>
+    <div class="pulse-ring pulse-ring-3"></div>
+
+    <!-- KADAM HERO FLOWER SVG -->
+    <div class="kadam-hero">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+        <defs>
+          <radialGradient id="petalGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#f5cc4a"/>
+            <stop offset="100%" stop-color="#E8B923"/>
+          </radialGradient>
+          <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#fff9e0"/>
+            <stop offset="50%" stop-color="#E8B923"/>
+            <stop offset="100%" stop-color="#b8901a"/>
+          </radialGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <!-- Petals layer 1 (outer) -->
+        <g transform="translate(100,100)" filter="url(#glow)">
+          <ellipse rx="14" ry="44" fill="url(#petalGrad)" opacity="0.9" transform="rotate(0) translate(0,-52)"/>
+          <ellipse rx="14" ry="44" fill="url(#petalGrad)" opacity="0.9" transform="rotate(30) translate(0,-52)"/>
+          <ellipse rx="14" ry="44" fill="url(#petalGrad)" opacity="0.9" transform="rotate(60) translate(0,-52)"/>
+          <ellipse rx="14" ry="44" fill="url(#petalGrad)" opacity="0.9" transform="rotate(90) translate(0,-52)"/>
+          <ellipse rx="14" ry="44" fill="url(#petalGrad)" opacity="0.9" transform="rotate(120) translate(0,-52)"/>
+          <ellipse rx="14" ry="44" fill="url(#petalGrad)" opacity="0.9" transform="rotate(150) translate(0,-52)"/>
+          <ellipse rx="14" ry="44" fill="url(#petalGrad)" opacity="0.9" transform="rotate(180) translate(0,-52)"/>
+          <ellipse rx="14" ry="44" fill="url(#petalGrad)" opacity="0.9" transform="rotate(210) translate(0,-52)"/>
+          <ellipse rx="14" ry="44" fill="url(#petalGrad)" opacity="0.9" transform="rotate(240) translate(0,-52)"/>
+          <ellipse rx="14" ry="44" fill="url(#petalGrad)" opacity="0.9" transform="rotate(270) translate(0,-52)"/>
+          <ellipse rx="14" ry="44" fill="url(#petalGrad)" opacity="0.9" transform="rotate(300) translate(0,-52)"/>
+          <ellipse rx="14" ry="44" fill="url(#petalGrad)" opacity="0.9" transform="rotate(330) translate(0,-52)"/>
+          <!-- Petals layer 2 (inner) -->
+          <ellipse rx="10" ry="32" fill="#f0c030" opacity="0.7" transform="rotate(15) translate(0,-38)"/>
+          <ellipse rx="10" ry="32" fill="#f0c030" opacity="0.7" transform="rotate(45) translate(0,-38)"/>
+          <ellipse rx="10" ry="32" fill="#f0c030" opacity="0.7" transform="rotate(75) translate(0,-38)"/>
+          <ellipse rx="10" ry="32" fill="#f0c030" opacity="0.7" transform="rotate(105) translate(0,-38)"/>
+          <ellipse rx="10" ry="32" fill="#f0c030" opacity="0.7" transform="rotate(135) translate(0,-38)"/>
+          <ellipse rx="10" ry="32" fill="#f0c030" opacity="0.7" transform="rotate(165) translate(0,-38)"/>
+          <ellipse rx="10" ry="32" fill="#f0c030" opacity="0.7" transform="rotate(195) translate(0,-38)"/>
+          <ellipse rx="10" ry="32" fill="#f0c030" opacity="0.7" transform="rotate(225) translate(0,-38)"/>
+          <ellipse rx="10" ry="32" fill="#f0c030" opacity="0.7" transform="rotate(255) translate(0,-38)"/>
+          <ellipse rx="10" ry="32" fill="#f0c030" opacity="0.7" transform="rotate(285) translate(0,-38)"/>
+          <ellipse rx="10" ry="32" fill="#f0c030" opacity="0.7" transform="rotate(315) translate(0,-38)"/>
+          <ellipse rx="10" ry="32" fill="#f0c030" opacity="0.7" transform="rotate(345) translate(0,-38)"/>
+          <!-- Center sphere -->
+          <circle r="24" fill="url(#centerGrad)" />
+          <circle r="18" fill="#fff9e0" opacity="0.3"/>
+          <circle r="8" fill="#fffde7" opacity="0.6"/>
+        </g>
+        <!-- Stem -->
+        <path d="M100 124 Q95 160 90 180" stroke="#1B4332" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <!-- Two leaves -->
+        <path d="M94 155 Q70 145 65 160 Q80 165 94 158" fill="#1B4332" opacity="0.8"/>
+        <path d="M90 168 Q110 162 115 175 Q100 178 90 170" fill="#1B4332" opacity="0.8"/>
+      </svg>
+    </div>
+  </div>
+
+  <h1 class="hero-title">Kadam Memories</h1>
+  <p class="hero-subtitle">কিছু গল্প পূর্ণতা পায় না,<br/>কিন্তু স্মৃতি হয়ে আজীবন থেকে যায়।</p>
+  <a href="#story-start" class="hero-btn">আমার গল্প</a>
+
+  <div class="scroll-indicator">
+    <span></span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 1 — শুরুটা
+═══════════════════════════════════════════ -->
+<section class="story-section" id="story-start">
+  <div class="section-inner">
+    <div class="glass-card reveal">
+      <div class="section-number">০১</div>
+      <div class="section-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8B923" stroke-width="2">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+        </svg>
+      </div>
+      <h2 class="section-title">শুরুটা</h2>
+      <div class="section-text">
+        <p>আমি জানি না কতটুকু কী লিখতে পারবো। আমি তোমার মতো অত ভালো স্টুডেন্ট না। তবে চেষ্টা করবো ভালোভাবে লেখার।</p>
+        <p>আমি যখন তোমাকে <span class="highlight">ক্লাস ৩-এ</span> দেখি, তখন থেকেই তোমাকে আমার ভালো লাগতো।</p>
+        <p>তুমি যখন আম্মুর কাছে পড়তে আসতে, তখন আমরা একসাথে খেলতাম।</p>
+        <p>আমার মেয়েদের সাথে খেলতে ভালো লাগতো না, তবুও খেলতাম — শুধু তোমাকে দেখার জন্য, তোমার সাথে থাকার জন্য।</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Divider -->
+<div class="kadam-divider reveal">
+  <svg width="28" height="28" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(100,100)">
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(0) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(60) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(120) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(180) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(240) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(300) translate(0,-30)"/>
+      <circle r="14" fill="#E8B923"/>
+      <circle r="8" fill="#fff9e0" opacity="0.5"/>
+    </g>
+  </svg>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 2 — ছোটবেলার স্মৃতি
+═══════════════════════════════════════════ -->
+<section class="story-section section-alt">
+  <div class="section-inner">
+    <div class="glass-card reveal-left">
+      <div class="section-number">০২</div>
+      <div class="section-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8B923" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+        </svg>
+      </div>
+      <h2 class="section-title">ছোটবেলার স্মৃতি</h2>
+      <div class="section-text">
+        <p>কোনো এক কারণে স্কুল অনেকদিন বন্ধ ছিল।</p>
+        <p>সেই সময় তোমাকে না দেখতে পেয়ে খুব <span class="highlight">খারাপ লাগতো।</span></p>
+        <p>তোমাদের বাসার দিকে কয়েকবার গিয়েছিলাম শুধু তোমাকে দেখার জন্য।</p>
+        <p>কিন্তু তুমি কখনো বাসা থেকে বের হতে না।</p>
+        <p>তাই একদিন ইচ্ছা করে <span class="highlight">আমাদের ছাগল</span> তোমাদের খেতে ছেড়ে দিয়েছিলাম।</p>
+        <p>যাতে তোমরা ধরে নিয়ে যাও।</p>
+        <p>ঠিক তাই হয়েছিল। তোমার দাদু ছাগলটা ধরে নিয়ে গিয়েছিলেন।</p>
+        <p>আমি ছাগল আনতে গিয়ে তোমাকে দেখেছিলাম।</p>
+        <p>তুমি <span class="highlight">আম গাছের পাশে</span> দাঁড়িয়ে ছিলে।</p>
+        <p>আজও সেই দৃশ্য আমার পরিষ্কার মনে আছে।</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="kadam-divider reveal">
+  <svg width="28" height="28" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(100,100)">
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(0) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(60) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(120) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(180) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(240) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(300) translate(0,-30)"/>
+      <circle r="14" fill="#E8B923"/>
+      <circle r="8" fill="#fff9e0" opacity="0.5"/>
+    </g>
+  </svg>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 3 — দূরত্ব
+═══════════════════════════════════════════ -->
+<section class="story-section">
+  <div class="section-inner">
+    <div class="glass-card reveal">
+      <div class="section-number">০৩</div>
+      <div class="section-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8B923" stroke-width="2">
+          <path d="M3 12h18M3 6h18M3 18h18"/>
+        </svg>
+      </div>
+      <h2 class="section-title">দূরত্ব</h2>
+      <div class="section-text">
+        <p>সময়ের সাথে সাথে অনেক কিছু বদলে গেল।</p>
+        <p><span class="highlight">স্কুল আলাদা হয়ে গেল।</span></p>
+        <p>দেখা হওয়া কমে গেল।</p>
+        <p>এরপর আমরা পঞ্চগড়ে চলে আসলাম।</p>
+        <p>তবুও মাঝে মাঝে তোমার কথা মনে পড়তো।</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="kadam-divider reveal">
+  <svg width="28" height="28" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(100,100)">
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(0) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(60) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(120) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(180) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(240) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(300) translate(0,-30)"/>
+      <circle r="14" fill="#E8B923"/>
+      <circle r="8" fill="#fff9e0" opacity="0.5"/>
+    </g>
+  </svg>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 4 — ঈদের সেই দিন
+═══════════════════════════════════════════ -->
+<section class="story-section section-alt">
+  <div class="section-inner">
+    <div class="glass-card reveal-left">
+      <div class="section-number">০৪</div>
+      <div class="section-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8B923" stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+        </svg>
+      </div>
+      <h2 class="section-title">ঈদের সেই দিন</h2>
+      <div class="section-text">
+        <p>পঞ্চগড়ে আসার পর শুধু <span class="highlight">একবার</span> তোমার সাথে দেখা হয়েছিল।</p>
+        <p>কোনো এক ঈদের দিনে।</p>
+        <p>সেদিন তোমাকে দেখে আবার <span class="highlight">নতুন করে ভালো লাগা</span> শুরু হয়েছিল।</p>
+        <p>তখন বুঝতে শিখেছিলাম অনুভূতি কাকে বলে।</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="kadam-divider reveal">
+  <svg width="28" height="28" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(100,100)">
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(0) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(60) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(120) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(180) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(240) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(300) translate(0,-30)"/>
+      <circle r="14" fill="#E8B923"/>
+      <circle r="8" fill="#fff9e0" opacity="0.5"/>
+    </g>
+  </svg>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 5 — অপেক্ষা
+═══════════════════════════════════════════ -->
+<section class="story-section">
+  <div class="section-inner">
+    <div class="glass-card reveal">
+      <div class="section-number">০৫</div>
+      <div class="section-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8B923" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <h2 class="section-title">অপেক্ষা</h2>
+      <div class="section-text">
+        <p>আমি যখন গাড়ি চালানো শিখলাম, মাঝে মাঝে তোমাদের দিকে যেতাম।</p>
+        <p>কিন্তু কোনোদিন তোমার দেখা পেতাম না।</p>
+        <p>রংপুরে চলে যাওয়ার পর <span class="highlight">ব্যস্ততা বেড়ে গেল।</span></p>
+        <p>তবুও যখন বাসায় ফিরতাম, তোমার কথা মনে পড়তো।</p>
+        <p>আমি অনেকবার তোমাদের এলাকায় গিয়েছি।</p>
+        <p>শুধু <span class="highlight">একবার তোমাকে দেখার আশায়।</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="kadam-divider reveal">
+  <svg width="28" height="28" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(100,100)">
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(0) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(60) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(120) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(180) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(240) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(300) translate(0,-30)"/>
+      <circle r="14" fill="#E8B923"/>
+      <circle r="8" fill="#fff9e0" opacity="0.5"/>
+    </g>
+  </svg>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 6 — মেসেজ
+═══════════════════════════════════════════ -->
+<section class="story-section section-alt">
+  <div class="section-inner">
+    <div class="glass-card reveal-left">
+      <div class="section-number">০৬</div>
+      <div class="section-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8B923" stroke-width="2">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        </svg>
+      </div>
+      <h2 class="section-title">মেসেজ</h2>
+      <div class="section-text">
+        <p>তোমাকে মেসেজ দেওয়ার কোনো ইচ্ছা ছিল না।</p>
+        <p>কিন্তু আমার <span class="highlight">মামাতো বোন</span> অনেক জোর করেছিল।</p>
+        <p>শেষ পর্যন্ত মেসেজ দিয়েছিলাম।</p>
+        <p>বিশ্বাস করো, আমার <span class="highlight">০.১% আশাও ছিল না</span> যে তুমি রিপ্লাই দিবে।</p>
+        <p>তোমার রিপ্লাই দেখে আমি সত্যিই অবাক হয়েছিলাম।</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="kadam-divider reveal">
+  <svg width="28" height="28" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(100,100)">
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(0) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(60) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(120) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(180) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(240) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(300) translate(0,-30)"/>
+      <circle r="14" fill="#E8B923"/>
+      <circle r="8" fill="#fff9e0" opacity="0.5"/>
+    </g>
+  </svg>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 7 — সত্যিটা
+═══════════════════════════════════════════ -->
+<section class="story-section">
+  <div class="section-inner">
+    <div class="glass-card reveal" style="border-color: rgba(232,185,35,0.4); background: rgba(232,185,35,0.04);">
+      <div class="section-number">০৭</div>
+      <div class="section-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#E8B923" stroke="#E8B923" stroke-width="1">
+          <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+        </svg>
+      </div>
+      <h2 class="section-title">সত্যিটা</h2>
+      <div class="section-text">
+        <p style="font-size: clamp(1.1rem, 2.5vw, 1.35rem); line-height: 2.3;">আমি তোমাকে <span class="highlight" style="font-size: 1.2em; font-weight: 600;">পছন্দ করি।</span></p>
+        <p>এই কথাটা এত বছর শুধু <span class="highlight">আমার বোন জানতো।</span></p>
+        <p>আজ তুমি জানো।</p>
+        <p>তাছাড়া আর কেউ জানতো না।</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="kadam-divider reveal">
+  <svg width="28" height="28" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(100,100)">
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(0) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(60) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(120) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(180) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(240) translate(0,-30)"/>
+      <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.8" transform="rotate(300) translate(0,-30)"/>
+      <circle r="14" fill="#E8B923"/>
+      <circle r="8" fill="#fff9e0" opacity="0.5"/>
+    </g>
+  </svg>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 8 — শেষ অধ্যায়
+═══════════════════════════════════════════ -->
+<section class="story-section section-alt">
+  <div class="section-inner">
+    <div class="glass-card reveal-left">
+      <div class="section-number">০৮</div>
+      <div class="section-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8B923" stroke-width="2">
+          <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+        </svg>
+      </div>
+      <h2 class="section-title">শেষ অধ্যায়</h2>
+      <div class="section-text">
+        <p>সব গল্প এক হয় না।</p>
+        <p>সব অনুভূতিরও উত্তর পাওয়া যায় না।</p>
+        <p><span class="highlight">কিছু গল্প স্মৃতি হয়ে থেকে যায়।</span></p>
+        <p>এই ওয়েবসাইট সেই স্মৃতির জন্য।</p>
+        <p>কারো প্রতি অভিযোগ নয়।</p>
+        <p>কারো প্রতি রাগ নয়।</p>
+        <p>শুধু জীবনের একটি <span class="highlight">সুন্দর অধ্যায়ের</span> স্মরণ।</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     FINAL SECTION
+═══════════════════════════════════════════ -->
+<section id="final-section">
+  <div class="final-glow"></div>
+
+  <!-- Kadam Tree SVG -->
+  <div class="kadam-tree-wrap reveal">
+    <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" width="280" height="280">
+      <defs>
+        <radialGradient id="treeGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(232,185,35,0.4)"/>
+          <stop offset="100%" stop-color="transparent"/>
+        </radialGradient>
+        <radialGradient id="treePetalG" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#f5cc4a"/>
+          <stop offset="100%" stop-color="#c49a10"/>
+        </radialGradient>
+      </defs>
+      <!-- Ground glow -->
+      <ellipse cx="140" cy="268" rx="70" ry="10" fill="rgba(232,185,35,0.12)"/>
+      <!-- Trunk -->
+      <path d="M140 270 Q138 240 136 210 Q134 180 140 150" stroke="#2d6a4f" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <!-- Main branches -->
+      <path d="M140 200 Q115 185 95 175" stroke="#2d6a4f" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M140 185 Q165 170 185 162" stroke="#2d6a4f" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M140 165 Q130 145 128 128" stroke="#2d6a4f" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M140 170 Q155 148 162 132" stroke="#2d6a4f" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <!-- Sub branches -->
+      <path d="M95 175 Q78 165 68 155" stroke="#1B4332" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M95 175 Q88 158 85 145" stroke="#1B4332" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M185 162 Q200 150 210 142" stroke="#1B4332" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M185 162 Q192 148 196 135" stroke="#1B4332" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <!-- Leaves -->
+      <ellipse cx="72" cy="148" rx="18" ry="10" fill="#1B4332" opacity="0.7" transform="rotate(-20,72,148)"/>
+      <ellipse cx="60" cy="160" rx="14" ry="8" fill="#2d6a4f" opacity="0.6" transform="rotate(10,60,160)"/>
+      <ellipse cx="88" cy="138" rx="16" ry="9" fill="#1B4332" opacity="0.7" transform="rotate(-35,88,138)"/>
+      <ellipse cx="210" cy="135" rx="18" ry="10" fill="#1B4332" opacity="0.7" transform="rotate(20,210,135)"/>
+      <ellipse cx="200" cy="148" rx="14" ry="8" fill="#2d6a4f" opacity="0.6" transform="rotate(-10,200,148)"/>
+      <ellipse cx="196" cy="128" rx="16" ry="9" fill="#1B4332" opacity="0.7" transform="rotate(35,196,128)"/>
+      <ellipse cx="130" cy="120" rx="15" ry="9" fill="#1B4332" opacity="0.7" transform="rotate(-15,130,120)"/>
+      <ellipse cx="164" cy="122" rx="15" ry="9" fill="#2d6a4f" opacity="0.6" transform="rotate(15,164,122)"/>
+      <!-- Kadam flowers on tree -->
+      <g transform="translate(68,143)">
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(0) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(60) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(120) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(180) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(240) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(300) translate(0,-18)"/>
+        <circle r="9" fill="#E8B923"/>
+        <circle r="5" fill="#fff9e0" opacity="0.4"/>
+      </g>
+      <g transform="translate(210,138)">
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(0) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(60) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(120) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(180) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(240) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(300) translate(0,-18)"/>
+        <circle r="9" fill="#E8B923"/>
+        <circle r="5" fill="#fff9e0" opacity="0.4"/>
+      </g>
+      <g transform="translate(128,115)">
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(0) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(60) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(120) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(180) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(240) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(300) translate(0,-18)"/>
+        <circle r="9" fill="#E8B923"/>
+        <circle r="5" fill="#fff9e0" opacity="0.4"/>
+      </g>
+      <g transform="translate(164,118)">
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(0) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(60) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(120) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(180) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(240) translate(0,-18)"/>
+        <ellipse rx="5" ry="15" fill="url(#treePetalG)" opacity="0.9" transform="rotate(300) translate(0,-18)"/>
+        <circle r="9" fill="#E8B923"/>
+        <circle r="5" fill="#fff9e0" opacity="0.4"/>
+      </g>
+      <!-- Top center large flower -->
+      <g transform="translate(140,85)">
+        <ellipse rx="7" ry="22" fill="url(#treePetalG)" opacity="0.95" transform="rotate(0) translate(0,-26)"/>
+        <ellipse rx="7" ry="22" fill="url(#treePetalG)" opacity="0.95" transform="rotate(45) translate(0,-26)"/>
+        <ellipse rx="7" ry="22" fill="url(#treePetalG)" opacity="0.95" transform="rotate(90) translate(0,-26)"/>
+        <ellipse rx="7" ry="22" fill="url(#treePetalG)" opacity="0.95" transform="rotate(135) translate(0,-26)"/>
+        <ellipse rx="7" ry="22" fill="url(#treePetalG)" opacity="0.95" transform="rotate(180) translate(0,-26)"/>
+        <ellipse rx="7" ry="22" fill="url(#treePetalG)" opacity="0.95" transform="rotate(225) translate(0,-26)"/>
+        <ellipse rx="7" ry="22" fill="url(#treePetalG)" opacity="0.95" transform="rotate(270) translate(0,-26)"/>
+        <ellipse rx="7" ry="22" fill="url(#treePetalG)" opacity="0.95" transform="rotate(315) translate(0,-26)"/>
+        <circle r="14" fill="#E8B923"/>
+        <circle r="8" fill="#fff9e0" opacity="0.4"/>
+        <circle r="4" fill="#fffde7" opacity="0.7"/>
+      </g>
+      <!-- Glow under tree -->
+      <ellipse cx="140" cy="260" rx="60" ry="8" fill="url(#treeGlow)" opacity="0.3"/>
+    </svg>
+  </div>
+
+  <!-- Final Quote -->
+  <div class="final-quote reveal">
+    <p>"গল্পটা <span>আমার</span> ছিল।</p>
+    <p>সিদ্ধান্তটা <span>তার।</span></p>
+    <p>স্মৃতিগুলো <span>রয়ে গেছে।</span></p>
+    <p>জীবন <span>এগিয়ে চলেছে।</span>"</p>
+  </div>
+
+  <!-- Sep line -->
+  <div class="sep-line" id="final-sep"></div>
+
+  <!-- Small kadam icon -->
+  <div style="opacity: 0.5; margin-top: 10px;">
+    <svg width="40" height="40" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(100,100)">
+        <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.7" transform="rotate(0) translate(0,-30)"/>
+        <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.7" transform="rotate(60) translate(0,-30)"/>
+        <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.7" transform="rotate(120) translate(0,-30)"/>
+        <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.7" transform="rotate(180) translate(0,-30)"/>
+        <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.7" transform="rotate(240) translate(0,-30)"/>
+        <ellipse rx="8" ry="26" fill="#E8B923" opacity="0.7" transform="rotate(300) translate(0,-30)"/>
+        <circle r="14" fill="#E8B923"/>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════ -->
+<footer>
+  <p><span>Kadam Memories</span> &copy; Forever Preserved</p>
+  <p style="margin-top: 8px; font-size: 0.78rem; opacity: 0.5; letter-spacing: 1px;">স্মৃতি চিরন্তন। জীবন চলমান।</p>
+</footer>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════ -->
+<script>
+// ── RAIN ANIMATION ──────────────────────────
+const canvas = document.getElementById('rain-canvas');
+const ctx = canvas.getContext('2d');
+let drops = [];
+const RAIN_COUNT = 180;
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+function initRain() {
+  drops = [];
+  for (let i = 0; i < RAIN_COUNT; i++) {
+    drops.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      len: Math.random() * 18 + 8,
+      speed: Math.random() * 4 + 3,
+      opacity: Math.random() * 0.4 + 0.1,
+      width: Math.random() * 1 + 0.3,
+    });
+  }
+}
+
+function drawRain() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drops.forEach(d => {
+    ctx.beginPath();
+    ctx.moveTo(d.x, d.y);
+    ctx.lineTo(d.x - 1, d.y + d.len);
+    ctx.strokeStyle = `rgba(180, 210, 230, ${d.opacity})`;
+    ctx.lineWidth = d.width;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    d.y += d.speed;
+    d.x -= 0.5;
+    if (d.y > canvas.height) {
+      d.y = -d.len;
+      d.x = Math.random() * canvas.width;
+    }
+  });
+  requestAnimationFrame(drawRain);
+}
+
+resizeCanvas();
+initRain();
+drawRain();
+window.addEventListener('resize', () => { resizeCanvas(); initRain(); });
+
+// ── PETAL ANIMATION ──────────────────────────
+const petalContainer = document.getElementById('petal-container');
+const PETAL_COUNT = 18;
+
+function createKadamPetalSVG(size, color) {
+  const s = size;
+  return `<svg width="${s}" height="${s}" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(100,100)">
+      <ellipse rx="10" ry="32" fill="${color}" opacity="0.85" transform="rotate(0) translate(0,-36)"/>
+      <ellipse rx="10" ry="32" fill="${color}" opacity="0.85" transform="rotate(60) translate(0,-36)"/>
+      <ellipse rx="10" ry="32" fill="${color}" opacity="0.85" transform="rotate(120) translate(0,-36)"/>
+      <ellipse rx="10" ry="32" fill="${color}" opacity="0.85" transform="rotate(180) translate(0,-36)"/>
+      <ellipse rx="10" ry="32" fill="${color}" opacity="0.85" transform="rotate(240) translate(0,-36)"/>
+      <ellipse rx="10" ry="32" fill="${color}" opacity="0.85" transform="rotate(300) translate(0,-36)"/>
+      <circle r="16" fill="${color}"/>
+      <circle r="9" fill="#fff9e0" opacity="0.4"/>
+    </g>
+  </svg>`;
+}
+
+function spawnPetal() {
+  const petal = document.createElement('div');
+  petal.classList.add('petal');
+  const size = Math.random() * 24 + 12;
+  const colors = ['#E8B923', '#f5cc4a', '#d4a017', '#ffd740', '#c49a10'];
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  petal.innerHTML = createKadamPetalSVG(size, color);
+  petal.style.left = Math.random() * 100 + 'vw';
+  petal.style.top = '-60px';
+  const dur = Math.random() * 12 + 10;
+  const delay = Math.random() * 8;
+  petal.style.animation = `petalFall ${dur}s ${delay}s linear infinite`;
+  petalContainer.appendChild(petal);
+}
+
+for (let i = 0; i < PETAL_COUNT; i++) spawnPetal();
+
+// ── SCROLL REVEAL ────────────────────────────
+const revealEls = document.querySelectorAll('.reveal, .reveal-left, .sep-line');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.15 });
+
+revealEls.forEach(el => observer.observe(el));
+
+// ── SCROLL PROGRESS BAR ───────────────────────
+const progressBar = document.getElementById('progress-bar');
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  progressBar.style.width = pct + '%';
+});
+
+// ── AMBIENT MUSIC (Web Audio API — rain + ambient) ──
+let audioCtx = null;
+let musicPlaying = false;
+let gainNode = null;
+let noiseSource = null;
+let filterNode = null;
+let lfoNode = null;
+let oscillator1 = null;
+let oscillator2 = null;
+let oscillator3 = null;
+let masterGain = null;
+
+function createAmbientSound() {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+  masterGain.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 2);
+  masterGain.connect(audioCtx.destination);
+
+  // Rain noise
+  const bufferSize = audioCtx.sampleRate * 4;
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * 0.3;
+  }
+  noiseSource = audioCtx.createBufferSource();
+  noiseSource.buffer = noiseBuffer;
+  noiseSource.loop = true;
+
+  filterNode = audioCtx.createBiquadFilter();
+  filterNode.type = 'bandpass';
+  filterNode.frequency.value = 1200;
+  filterNode.Q.value = 0.5;
+
+  const rainGain = audioCtx.createGain();
+  rainGain.gain.value = 0.18;
+
+  noiseSource.connect(filterNode);
+  filterNode.connect(rainGain);
+  rainGain.connect(masterGain);
+  noiseSource.start();
+
+  // Ambient drone oscillators
+  const notes = [
+    { freq: 110, type: 'sine', vol: 0.06 },
+    { freq: 164.81, type: 'sine', vol: 0.04 },
+    { freq: 220, type: 'sine', vol: 0.03 },
+    { freq: 329.63, type: 'triangle', vol: 0.025 },
+  ];
+
+  notes.forEach(n => {
+    const osc = audioCtx.createOscillator();
+    osc.type = n.type;
+    osc.frequency.value = n.freq;
+    const g = audioCtx.createGain();
+    g.gain.value = n.vol;
+    const lfo = audioCtx.createOscillator();
+    lfo.frequency.value = 0.1 + Math.random() * 0.1;
+    const lfoGain = audioCtx.createGain();
+    lfoGain.gain.value = 1.5;
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc.frequency);
+    lfo.start();
+    osc.connect(g);
+    g.connect(masterGain);
+    osc.start();
+  });
+}
+
+function stopAmbientSound() {
+  if (!audioCtx) return;
+  masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5);
+  setTimeout(() => {
+    audioCtx.close();
+    audioCtx = null;
+  }, 1600);
+}
+
+const musicBtn = document.getElementById('music-btn');
+const iconOn = document.getElementById('music-icon-on');
+const iconOff = document.getElementById('music-icon-off');
+
+musicBtn.addEventListener('click', () => {
+  if (!musicPlaying) {
+    createAmbientSound();
+    musicPlaying = true;
+    iconOn.style.display = 'none';
+    iconOff.style.display = 'block';
+    musicBtn.style.boxShadow = '0 0 30px rgba(232,185,35,0.7)';
+  } else {
+    stopAmbientSound();
+    musicPlaying = false;
+    iconOn.style.display = 'block';
+    iconOff.style.display = 'none';
+    musicBtn.style.boxShadow = '0 0 20px rgba(232,185,35,0.2)';
+  }
+});
+
+// ── PARALLAX SUBTLE ───────────────────────────
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  const hero = document.getElementById('hero');
+  if (hero) {
+    hero.style.backgroundPositionY = (scrollY * 0.3) + 'px';
+  }
+});
+
+// ── SMOOTH SCROLL ─────────────────────────────
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+// ── MOUSE SPARKLE ON HERO ─────────────────────
+const hero = document.getElementById('hero');
+hero.addEventListener('mousemove', (e) => {
+  if (Math.random() > 0.85) {
+    const spark = document.createElement('div');
+    spark.style.cssText = `
+      position: fixed;
+      left: ${e.clientX}px;
+      top: ${e.clientY}px;
+      width: 4px; height: 4px;
+      background: #E8B923;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      animation: sparkFade 0.8s ease forwards;
+    `;
+    document.body.appendChild(spark);
+    setTimeout(() => spark.remove(), 900);
+  }
+});
+
+// Add sparkle keyframe dynamically
+const sparkStyle = document.createElement('style');
+sparkStyle.textContent = `
+  @keyframes sparkFade {
+    0%   { transform: scale(1) translate(0,0); opacity: 1; }
+    100% { transform: scale(0) translate(${(Math.random()-0.5)*40}px, -30px); opacity: 0; }
+  }
+`;
+document.head.appendChild(sparkStyle);
+
+// ── TYPING CURSOR on hero subtitle ────────────
+// already rendered, just add a blinking cursor effect
+const heroSub = document.querySelector('.hero-subtitle');
+if (heroSub) {
+  const cursor = document.createElement('span');
+  cursor.style.cssText = `
+    display: inline-block;
+    width: 2px; height: 1.1em;
+    background: #E8B923;
+    margin-left: 4px;
+    vertical-align: middle;
+    animation: blink 1.2s step-end infinite;
+  `;
+  heroSub.appendChild(cursor);
+  const blinkStyle = document.createElement('style');
+  blinkStyle.textContent = `@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }`;
+  document.head.appendChild(blinkStyle);
+}
+
+// ── FINAL SEP REVEAL ─────────────────────────
+const finalSep = document.getElementById('final-sep');
+const sepObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('visible');
+  });
+}, { threshold: 0.5 });
+if (finalSep) sepObserver.observe(finalSep);
+
+// ── INIT ─────────────────────────────────────
+console.log('%cKadam Memories 🌼', 'color:#E8B923; font-size:20px; font-weight:bold;');
+console.log('%cকিছু গল্প পূর্ণতা পায় না, কিন্তু স্মৃতি হয়ে আজীবন থেকে যায়।', 'color:#F8F9FA; font-size:13px;');
+</script>
+</body>
+</html>
